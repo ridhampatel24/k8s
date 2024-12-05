@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nginx-demo-rc
+spec:
+  replicas: 3
+  selector:
+    app: nginx-prod
+  template:
+    metadata:
+      name: nginx-demo
+      labels:
+        app: nginx-prod
+        env: prod
+        release: v1.0
+    spec:
+      containers:
+        - name: write-container
+          image: alpine
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do date >> /var/log/index.html; sleep 3;done"]
+          volumeMounts:
+            - name: shared-data
+              mountPath: /var/log
+        - name: read-container
+          image: nginx:1.22.0
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: "0.2"
+              memory: "300Mi"
+          volumeMounts:
+            - name: shared-data
+              mountPath: /usr/share/nginx/html
+      volumes:
+        - name: shared-data
+          emptyDir: {}
+
+# k scale --replicas=10 rc nginx-demo-rc
+# k api-resources | grep replicationcontroller
+# k get rc
+# k get rc nginx-demo-rc -o yaml
+# k get pods -o wide
+# k describe rc nginx-demo-rc
+# k delete rc nginx-demo-rc
+# k get po -o wide --show-labels
+# k delete --cascade=orphan rc nginx-demo-rc
+# k delete po --all
