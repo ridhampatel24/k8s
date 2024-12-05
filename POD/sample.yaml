@@ -10,7 +10,20 @@ spec:
     - name: nginx
       image: nginx:latest
       ports:
-        - containerPort: 80
+        - name: nginx-port 
+          containerPort: 80
+          protocol: TCP
+      env:
+        - name: DB_USER
+          value: "devops"
+      resources:
+        limits:            #maximum resources allowed
+          cpu: "500m"      #1 core = 1000m, 100% - 1 core
+          memory: "500Mi"  #1Gi = 1024Mi,Ki,Gi,Ti
+        requests:          #minimum resources required
+          cpu: "0.2"
+          memory: "200Mi"
+      
       volumeMounts:
         - name: my-data
           mountPath: /var/www/html
@@ -24,11 +37,12 @@ spec:
 # k api-versions
 # k apply -f sample.yaml
 # k delete -f sample.yaml or k delete pod nginx-demo
+# k get pods
 # k get po -o wide
 # k get po -o wide --show-labels
 # k logs nginx-ridham or k logs nginx-ridham -c <container_name> (if we have multiple containers)
-
 # k run -it nginx-ridham --image=nginx:1.22.0 --restart=Always
+# k run -it nginx --image=nginx -- bash
 # k get pods
 # k describe pod nginx-demo
 # k exec -it nginx-demo -- /bin/bash
