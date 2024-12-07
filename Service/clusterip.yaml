@@ -12,6 +12,7 @@ spec:
       port: 80  # Service port
       targetPort: 80 # Pod port
   #type: ClusterIP
+  # k expose deployment nginx-deploy --port=8090 --target-port=80 --selector=app=nginx-prod --name=nginx-svc
   # In the backend the service is using Endpoints to route the traffic to the pods
   # ClusterIP is the default type
   # ClusterIP: Exposes the service on a cluster-internal IP. Choosing this value makes the service only reachable from within the cluster.
