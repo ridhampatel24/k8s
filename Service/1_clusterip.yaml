@@ -17,4 +17,5 @@ spec:
   # ClusterIP is the default type
   # ClusterIP: Exposes the service on a cluster-internal IP. Choosing this value makes the service only reachable from within the cluster.
   # <svc-name>.<namespace>.svc.cluster.local  # DNS name of the service in the cluster
+  # kubectl label pod test-pod app- # Remove label from pod test-pod with key app.
   # NodePort: Exposes the service on each Node’s IP at a static port (the NodePort). A ClusterIP service, to which the NodePort service will route, is automatically created.
