@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-demo
+  labels:
+    app: nginx
+    env: prod
+spec:
+  containers:
+    - name: nginx
+      image: nginx:latest
+      ports:
+        - name: nginx-port 
+          containerPort: 80
+          protocol: TCP
+      env:
+        - name: DB_USER
+          value: "devops"
+      resources:
+        limits:
+          cpu: "500m"
+          memory: "500Mi"
+        requests:
+          cpu: "0.2"
+          memory: "200Mi"
+      
+      volumeMounts:
+        - name: my-data
+          mountPath: /usr/share/nginx/html
+
+  #This will create a empty directory in the pod and the data will be stored in the disk
+  volumes:
+    - name: my-data
+      emptyDir: {}
+
+ #This will create a empty directory in the pod and the data will be stored in the memory (RAM)
+ #of the node where the pod is running.
+
+  volume:
+   - name: my-data
+     emptyDir:
+        medium: Memory
+        sizeLimit: 50Mi

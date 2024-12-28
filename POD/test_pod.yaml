@@ -6,9 +6,16 @@ metadata:
     app: nginx-prod
     env: prod
 spec:
+  nodeName: worker-vm
   containers:
     - image: nginx:1.22.0
       name: test-container
+      env:
+        - name: OWNER
+          valueFrom:
+            secretKeyRef:
+              name: my-secret
+              key: owner
       ports:
         - containerPort: 80
           name: nginx-port
