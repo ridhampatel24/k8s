@@ -18,6 +18,8 @@ spec:
       volumeMounts:
         - name: my-data
           mountPath: /var/log
+        - name: info-data
+          mountPath: /var/tmp/info.php
     - name: nginx
       image: nginx:latest
       ports:
@@ -45,3 +47,8 @@ spec:
       hostPath:
         path: /home/ubuntu/data
         type: DirectoryOrCreate
+
+    - name: info-data
+      hostPath:
+        path: /home/ubuntu/info.php
+        type: FileOrCreate
