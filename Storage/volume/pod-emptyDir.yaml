@@ -7,6 +7,18 @@ metadata:
     env: prod
 spec:
   containers:
+    - name: write-container
+      image: alpine
+      command: ["/bin/sh"]
+      args: ["-c", "while true; do date >> /var/log/index.html; sleep 10;done"]
+      resources:
+        limits:
+          cpu: "0.1"
+          memory: "50Mi"
+      volumeMounts:
+        - name: my-data
+          mountPath: /var/log
+          
     - name: nginx
       image: nginx:latest
       ports:
