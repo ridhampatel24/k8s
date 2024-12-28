@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment 
+metadata:
+  name: jenkins-master
+  labels:
+    app: cicd-master
+    env: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cicd-master
+      env: prod
+  template:
+    metadata:
+      name: jenkins-pod
+      labels:
+        app: cicd-master
+        env: prod
+    spec:
+      nodeName: k8s-master
+      containers:
+        - name: cicd-master
+          image: jenkins/jenkins:lts
+          ports:
+            - containerPort: 8080
+              name: jenkins-port
+              protocol: TCP
+          volumeMounts:
+            - name: jenkins-data
+              mountPath: /var/jenkins_home
+      volumes:
+        - name: jenkins-data
+          nfs:
+            server: 10.0.0.5
+            path: /mnt/nfs_share/jenkins-data
+
+      # changed permissions of the nfs share folder to chown 1000:1000 as jenkins user runs on 1000
+      # sudo chown -R 1000:1000 /mnt/nfs_share/jenkins-data
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins-service
+  labels:
+    app: cicd-master
+    env: prod
+spec:
+  selector:
+    app: cicd-master
+    env: prod
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 29245
+  type: NodePort
