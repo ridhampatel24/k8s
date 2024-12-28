@@ -18,6 +18,7 @@ spec:
         app: nginx-prod
         env: prod
     spec:
+      nodeName: k8s-master
       containers:
         - name: write-container
           image: alpine
