@@ -6,7 +6,7 @@ metadata:
     app: nginx-prod
     env: production
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       env: production
@@ -28,15 +28,30 @@ spec:
                   fieldPath: status.podIP
           resources:
             limits:
-              cpu: "0.1"
-              memory: "50Mi"
+              cpu: "200m"
+              memory: "200Mi"
+            requests:
+              cpu: "100m"
+              memory: "150Mi"
           volumeMounts:
             - name: shared-data
               mountPath: /var/log
+      # volumes:
+      #   - name: shared-data
+      #     downwardAPI:
+      #       items:
+      #       - path: index.html
+      #         fieldRef:
+      #           fieldPath: metadata.name
       volumes:
         - name: shared-data
           downwardAPI:
             items:
             - path: index.html
-              fieldRef:
-                fieldPath: metadata.name
+              resourceFieldRef:
+                containerName: write-container
+                resource: limits.cpu
+            - path: index2.html
+              resourceFieldRef:
+                containerName: write-container
+                resource: requests.memory

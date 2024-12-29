@@ -6,7 +6,7 @@ metadata:
     app: nginx-prod
     env: production
 spec:
-  replicas: 3
+  replicas: 2
   selector:
     matchLabels:
       env: production
@@ -20,16 +20,27 @@ spec:
         - name: write-container
           image: alpine
           command: ["/bin/sh"]
-          args: ["-c", "while true; do echo `date`: $POD_IP | tee -a  /var/log/index.html >> /proc/1/fd/1; sleep 10;done"]
+          args: ["-c", "while true; do echo `date`: $POD_IP : $CPU_LIMIT : $MEMORY_LIMIT | tee -a  /var/log/index.html >> /proc/1/fd/1; sleep 10;done"]
           env:
             - name: POD_IP
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            - name: CPU_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.cpu
+            - name: MEMORY_LIMIT
+              valueFrom:
+                resourceFieldRef:
+                  resource: limits.memory
           resources:
             limits:
-              cpu: "0.1"
-              memory: "50Mi"
+              cpu: "0.2"
+              memory: "250Mi"
+            requests:
+              cpu: "150m"
+              memory: "100Mi"
           volumeMounts:
             - name: shared-data
               mountPath: /var/log
