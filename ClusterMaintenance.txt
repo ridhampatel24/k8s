@@ -32,6 +32,11 @@ Step
 # Points to be used before upgrade
 
 1. kubectl drain node-1
-
+# This will evict all the pods from the node-1 and make it unschedulable
+# Pods which are not managed by a controller will be deleted 
+# Pods which are managed by a controller will be rescheduled to other nodes
 2. kubectl cordon node-1
+# This will make the node-1 unschedulable but will not evict the pods
+
 3. kubectl uncordon node-1
+# This will make the node-1 schedulable again after the upgrade
