@@ -1,6 +1,8 @@
 # To update kubelet to specific version
 apt-get upgrade -y kubelet=1.32.0-1.1  --allow-change-held-packages
-systemctl restart kubelet
+sudo systemctl daemon-reload    
+sudo kubeadm upgrade node
+sudo systemctl restart kubelet
 
 # To Check available versions
 apt-cache madison kubeadm
@@ -21,6 +23,7 @@ Step
 1. Update the kubeadm on masternode
 2. Run kubeadm upgrade plan and look for the version of K8s to upgrade
 3. Run kubeadm upgrade apply v1.30.8
+before running the below command, make sure to drain the node from master node as well as from the worker node
 4. Update the kubelet and restart the service
 5. Update the kubectl
 

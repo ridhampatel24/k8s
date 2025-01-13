@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-vol1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  capacity:
+    storage: 4Gi
+  # hostPath:
+  #   path: /tmp/dat1
+  # add azureDisk
+  # to use Azure Disk as the storage class for the PV install  azure-disk-csi driver from the Azure Marketplace link in the resources section of this module
+  azureDisk:
+    kind: Managed
+    diskName: ridham-pv
+    diskURI: /subscriptions/932e1b24-9c2e-41f0-b8de-3bdbb0ebf80b/resourcegroups/k8s-ridham/providers/Microsoft.Compute/disks/ridham-pv
+
+

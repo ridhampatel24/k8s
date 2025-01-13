@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: azure-disk-pv
+spec:
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  azureDisk:
+    diskName: k8s-pv
+    diskURI: /subscriptions/932e1b24-9c2e-41f0-b8de-3bdbb0ebf80b/resourceGroups/k8s-ridham/providers/Microsoft.Compute/disks/k8s-pv
+    kind: Managed
