@@ -1,0 +1,21 @@
+# storage class for azure disk in test resource group
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: azure-disk
+provisioner: disk.csi.azure.com
+parameters:
+  skuname: StandardSSD_LRS
+  cachingmode: None
+  location: centralindia
+  resourceGroup: k8s-ridham
+volumeBindingMode: Immediate
+allowVolumeExpansion: true
+reclaimPolicy: Delete
+allowedTopologies:
+  - matchLabelExpressions:
+      - key: topology.kubernetes.io/zone
+        values:
+          - centralindia-1
+
+
