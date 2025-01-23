@@ -5,7 +5,8 @@ metadata:
   name: azure-disk
 provisioner: disk.csi.azure.com
 parameters:
-  skuname: StandardSSD_LRS
+  # skuname: StandardSSD_LRS
+  skuname: Premium_LRS
   cachingmode: None
   location: centralindia
   resourceGroup: k8s-ridham
@@ -16,6 +17,4 @@ allowedTopologies:
   - matchLabelExpressions:
       - key: topology.kubernetes.io/zone
         values:
-          - centralindia-1
-
-
+          - centralindia1
