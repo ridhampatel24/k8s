@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+  labels:
+    app: nginx
+    env: prod
+spec:
+  containers:
+    - name: container-read
+      image: nginx:1.22.0
+      ports:
+        - name: nginx-port
+          containerPort: 80
+          protocol: TCP
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "250m"
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+  affinity:
+    nodeAffinity:
+      # requiredDuringSchedulingRequiredDuringExecution:
+      #   nodeSelectorTerms:
+      #     - matchExpressions:
+      #         - key: env
+      #           operator: In
+      #           values:
+      #             - dev
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 1
+          preference:
+            matchExpressions:
+              - key: demo
+                operator: In
+                values:
+                  - prod
+
+# operator: In, NotIn, Exists, DoesNotExist
+# key: The key of the label to match on.  key is required.
+# operator: Represents a key's relationship to a set of values.  operator is required.
+# values: An array of string values.  If the operator is In or NotIn, values is required.  If the operator is Exists or DoesNotExist, values should not be specified.

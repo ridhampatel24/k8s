@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo
+  labels:
+    app: nginx
+    env: prod
+spec:
+  containers:
+    - name: container-read
+      image: nginx:1.22.0
+      ports:
+        - name: nginx-port
+          containerPort: 80
+          protocol: TCP
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "250m"
+        limits:
+          memory: "128Mi"
+          cpu: "500m"
+  nodeSelector:
+    env: dev
+
+# node selector is a way to constrain the set of nodes that a pod is eligible to be scheduled based on labels on the node
+# node affinity is a property of pods that attracts them to a set of nodes (either as a preference or a hard requirement)
+# node affinity is conceptually similar to nodeSelector but it allows you to specify rules that are more complex than a simple equality test
+# node affinity is specified as field nodeAffinity of field affinity of podSpec
+# node affinity rules are evaluated as AND expressions
+# node affinity rules are evaluated in the order of preference
+# node affinity rules are not mandatory
+
+
+# k label node worker-vm env=dev
+# k label node worker-vm env-
+# k get nodes --show-labels
