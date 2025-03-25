@@ -9,3 +9,5 @@ spec:
     requests.memory: 4Gi
     limits.cpu: "6"
     limits.memory: 6Gi
+
+# ResourceQuota is a policy to constrain resource allocations (to limit the resource consumption) in a namespace.
