@@ -13,3 +13,6 @@ spec:
     min:
       memory: 128Mi
     type: Container
+
+# LimitRange is a policy to constrain resource allocations (to limit the resource consumption) in a namespace.
+# LimitRange is only affect new pods, and will not affect existing pods.
