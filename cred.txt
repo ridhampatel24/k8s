@@ -7,3 +7,4 @@ openssl genrsa -out my-bank.key 2048
 # Generate a public key from the private key
 openssl rsa -in my-bank.key -pubout -out > my-bank.pub
 
+curl https://20.198.19.245:6443 -k --key /home/bacancy/.kube/ridham.key --cert /home/bacancy/.kube/ridham.crt --cacert /home/bacancy/.kube/ca.crt
