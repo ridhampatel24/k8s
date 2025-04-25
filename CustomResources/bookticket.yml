@@ -1,0 +1,8 @@
+apiVersion: flights.com/v1
+kind: FlightTicket
+metadata:
+  name: bookticket
+spec:
+  from: "New York"
+  to: "Los Angeles"
+  number: 2

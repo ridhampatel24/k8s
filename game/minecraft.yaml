@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: minecraft-server
+  template:
+    metadata:
+      labels:
+        app: minecraft-server
+    spec:
+      initContainers:
+        - name: minecraft-installer
+          image: alpine:latest
+          command: ["/bin/sh"]
+          args:
+            - "-c"
+            - "echo \"umask 002\" >> /etc/bash.bashrc\nsource /etc/bash.bashrc\n\n# Setup for installation scripts\n# Directories where data should be installed finally.\nINSTALL_DIRECTORY=\"/home/container\" \nSERVER_DATA_DIRECTORY=\"$INSTALL_DIRECTORY/server-data\"\nSERVER_DIRECTORY=\"$INSTALL_DIRECTORY/server\"\nSESSION_LOGS=\"$SERVER_DATA_DIRECTORY/session-logs\"\n# create required directories for installation\nmkdir -p $SERVER_DATA_DIRECTORY || echo \"failed to create server data directory\"\nmkdir -p $SERVER_DIRECTORY || echo \"failed to create server directory\"\nmkdir -p $SESSION_LOGS || echo \"failed to create session logs directory\"\n# Pre Installation Setup\nexport HOME=$INSTALL_DIRECTORY\n# check if installation required or not.\nSUCCESS_FILE=\"$INSTALL_DIRECTORY/installation_success.txt\"\nFAILURE_FILE=\"$INSTALL_DIRECTORY/installation_failure.txt\"\nERROR_LOG=\"$INSTALL_DIRECTORY/error_log.txt\"\nif [ -f \"$SUCCESS_FILE\" ] && [ ! -f \"$FAILURE_FILE\" ]; then\n  echo \"Installation already completed. Skipping.\"\n  exit 0\nfi\n# Check if installation_failure.txt exists, if so, delete it and proceed to reinstall\nif [ -f \"$FAILURE_FILE\" ]; then\n  echo \"Previous installation failed, retrying...\"\n  rm -f \"$FAILURE_FILE\"\nfi\n# Function for success\nsuccess() {\n    echo \"Installation successful!\" >\"$SUCCESS_FILE\"\n    echo \"Installation Completed!\"\n    exit 0\n}\n# Function for failure\nfailure() {\n  echo \"Installation Failed!\"\n  PREV_ERROR_MESSAGE=$(tail -n 1 $ERROR_LOG 2>/dev/null) # Get the last error message if it exists\n  echo \"Installation failed. Check $ERROR_LOG for details.\" > $FAILURE_FILE\n  echo \"Previous Error (if any): $PREV_ERROR_MESSAGE\" >> $ERROR_LOG\n  echo \"$1\" >> $ERROR_LOG\n  exit 0\n}\n\n# Minecraft Installation Script\n# Update & Install required packages\napk update >/dev/null 2>&1\napk add curl jq >/dev/null 2>&1\n# Install Minecraft Server Files\ncd $SERVER_DIRECTORY\n# Take Minecraft vanilla version from user defined variable\nVANILLA_VERSION=${INSTALLATION_VANILLA_VERSION}\nLATEST_VERSION=$(curl -s https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r \".latest.release\")\nif [ -z \"$VANILLA_VERSION\" ] || [ \"$VANILLA_VERSION\" = \"latest\" ]; then\n    # Fetch the latest version\n    MANIFEST_VERSION=$(curl -s https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r \".versions[] | select(.id == \\\"$LATEST_VERSION\\\")\")\n    echo \"Minecraft Version Found Is : $MANIFEST_VERSION\"\n    # Extract the manifest URL from the version manifest\n    MANIFEST_URL=$(echo \"$MANIFEST_VERSION\" | jq -r \".url\")\nelse\n    # Fetch the manifest data for the specific version\n    MANIFEST_VERSION=$(curl -s https://launchermeta.mojang.com/mc/game/version_manifest.json | jq -r \".versions[] | select(.id == \\\"$VANILLA_VERSION\\\")\")\n    echo \"Minecraft Version Found Is : $MANIFEST_VERSION\"\n    # Extract the manifest URL from the version manifest\n    MANIFEST_URL=$(echo \"$MANIFEST_VERSION\" | jq -r \".url\")\nfi\nDOWNLOAD_URL=$(curl -s $MANIFEST_URL | jq -r \".downloads.server.url\")\n# Download server jar\necho \"Downloading Vanilla Minecraft Server with version $VANILLA_VERSION\"\nif curl -s -o ${SERVER_JARFILE} $DOWNLOAD_URL; then\n    echo \"$SERVER_JARFILE downloaded from download url : $DOWNLOAD_URL\"\n    # Call success function to mark installation as successful\n    success\nelse\n    echo \"Download failed! Creating failure log.\"\n    # Call failure function to mark installation as failed\n    failure\nfi\n"
+          env:
+            - name: INSTALLATION_VANILLA_VERSION
+              value: "1.21"
+            - name: MAX_PLAYERS
+              value: "20"
+            - name: ONLINE_MODE
+              value: "false"
+            - name: SERVER_JARFILE
+              value: "server.jar"
+            - name: TZ
+              value: "Universal"
+          volumeMounts:
+            - name: minecraft-data
+              mountPath: /home/container
+      containers:
+        - name: minecraft
+          image: ghcr.io/pterodactyl/yolks:java_21
+          stdin: true
+          tty: true
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              echo "umask 002" >> ~/.bashrc
+              source ~/.bashrc
+              INSTALL_DIRECTORY="/home/container"
+              SERVER_DATA_DIRECTORY="$INSTALL_DIR/server"
+              SERVER_DIRECTORY="$INSTALL_DIR/server-data"
+              SESSION_LOGS="$SERVER_DATA_DIRECTORY/session-logs"
+              mkdir -p $SERVER_DATA_DIRECTORY || echo "failed to create server data directory"
+              mkdir -p $SERVER_DIRECTORY || echo "failed to create server directory"
+              mkdir -p $SESSION_LOGS || echo "failed to create session logs directory"
+              # apt update || echo "failed to update packages"
+              # apt install tmux procps -y || echo "package installation failed"
+              # echo 'set -g mouse on\nset-option -g status off' > ~/.tmux.conf
+              # tmux source-file ~/.tmux.conf
+              # tail -f /dev/null
+              exec java -Xmx2G -Xms1G -jar /home/container/server/server.jar nogui
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+            requests:
+              cpu: "100m"
+              memory: "1Gi"
+          env:
+            - name: INSTALLATION_VANILLA_VERSION
+              value: "1.21"
+            - name: MAX_PLAYERS
+              value: "10"
+            - name: ONLINE_MODE
+              value: "True"
+            - name: SERVER_JARFILE
+              value: "server.jar"
+            - name: TZ
+              value: "Universal"
+          volumeMounts:
+            - name: minecraft-data
+              mountPath: /home/container
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            allowPrivilegeEscalation: true
+          ports:
+            - containerPort: 25565
+              name: minecraft-port
+            - containerPort: 25575
+              name: minecraft-rcon
+      volumes:
+        - name: minecraft-data
+          hostPath:
+            path: /mnt/data/minecraft
+        - name: userconf
+          hostPath:
+            path: /tmp/minecraft
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft-service
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: minecraft-server
+  ports:
+    - name: minecraft
+      port: 25565
+      targetPort: 25565
+      nodePort: 32226
+    - name: minecraft-rcon
+      port: 25575
+      targetPort: 25575
+      nodePort: 32227
+
+
+
