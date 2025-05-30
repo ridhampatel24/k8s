@@ -1,0 +1,54 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: test
+#  annotations:
+#    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: ridhampatel.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: test
+                port:
+                  number: 80
+          - path: /hello
+            pathType: Prefix
+            backend:
+              service:
+                name: test2
+                port:
+                  number: 80
+
+
+
+# An example Ingress that makes use of the controller:
+#   apiVersion: networking.k8s.io/v1
+#   kind: Ingress
+#   metadata:
+#     name: example
+#     namespace: foo
+#   spec:
+#     ingressClassName: nginx
+#     rules:
+#       - host: www.example.com
+#         http:
+#           paths:
+#             - pathType: Prefix
+#               backend:
+#                 service:
+#                   name: exampleService
+#                   port:
+#                     number: 80
+#               path: /
+#     # This section is only required if TLS is to be enabled for the Ingress
+#     tls:
+#       - hosts:
+#         - www.example.com
+#         secretName: example-tls
+
